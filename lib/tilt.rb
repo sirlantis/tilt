@@ -865,4 +865,32 @@ module Tilt
     end
   end
   register 'mab', MarkabyTemplate
+
+  class PrawnTemplate < Template
+    def initialize_engine
+      return if defined? ::Prawn
+      require_template_library 'prawn'
+    end
+
+    def prepare
+      options = @options.merge(:filename => eval_file, :line => line)
+      @engine = Prawn::Document.new(options)
+      @code   = data
+    end
+
+    def evaluate(scope, locals, &block)
+      locals[:pdf] = @engine
+      super(scope, locals, &block)
+    end
+
+    def precompiled_template(locals)
+      @code
+    end
+
+    def precompiled_postamble(locals)
+      "pdf.render"
+    end
+  end
+  register 'prawn', PrawnTemplate
+
 end
